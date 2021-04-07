@@ -14,6 +14,7 @@ class SawyerEnv(object):
 		self.end_effector_index = 19
 		self.real_time_simulation = False
 		self.num_joints = 0
+		self.table = None
 
 		self.hand_low = None
 		self.hand_high = None
@@ -27,6 +28,50 @@ class SawyerEnv(object):
 
 		return
 
+	def load_ugly_table(self):
+		return p.loadMJCF('data/basic_scene_test.xml')
+
+
+	def load_table(self):
+		tablebody_collision_id = p.createCollisionShape(
+    		shapeType=p.GEOM_MESH,
+    		fileName="data/tablebody.stl",
+			flags=p.URDF_USE_SELF_COLLISION
+		)
+
+		tablebody_visual_id = p.createVisualShape(
+			shapeType=p.GEOM_MESH,
+			fileName="data/tablebody.stl",
+		)
+
+
+		tabletop_collision_id = p.createCollisionShape(
+    		shapeType=p.GEOM_MESH,
+    		fileName="data/tabletop.stl",
+			flags=p.URDF_USE_SELF_COLLISION
+		)
+
+		tabletop_visual_id = p.createVisualShape(
+			shapeType=p.GEOM_MESH,
+			fileName="data/tabletop.stl",
+		)
+
+
+		body_id = p.createMultiBody(
+			#baseMass=0,
+			#baseCollisionShapeIndex=tablebody_collision_id,
+			#baseVisualShapeIndex=tablebody_visual_id,
+			linkMasses=[0,0],
+			linkCollisionShapeIndices=[tablebody_collision_id, tabletop_collision_id],
+			linkVisualShapeIndices=[tablebody_visual_id, tabletop_visual_id],
+			linkPositions=[[0,0,0],[0,0,0]],
+			linkOrientations=[[0, 0, 0, 1],[0, 0, 0, 1]],
+		)
+
+		return body_id
+
+    
+
 	def reset(self):
 		clid = p.connect(p.SHARED_MEMORY)
 		if (clid < 0):
@@ -34,6 +79,7 @@ class SawyerEnv(object):
 		p.loadURDF("plane.urdf",[0,0,-.98])
 		p.configureDebugVisualizer(p.COV_ENABLE_RENDERING,0)
 		self.body = p.loadURDF("sawyer_robot/sawyer_description/urdf/sawyer.urdf",[0,0,0])
+		self.table = self.load_ugly_table()
 		self.num_joints = p.getNumJoints(self.body)
 		p.configureDebugVisualizer(p.COV_ENABLE_RENDERING,1)
 		p.resetBasePositionAndOrientation(self.body,[0,0,0],[0,0,0,1])
@@ -47,9 +93,8 @@ class SawyerEnv(object):
 			joint_indices=[8,10,13,],
 			angles=[float(-np.pi / 4.0), float(np.pi / 4.0), float(np.pi / 2.0),],
 		)
-
 		p.setRealTimeSimulation(self.real_time_simulation)
-		p.setGravity(0,0,-9.8)
+		p.setGravity(0,0,0)
 		return
 
 	def step(self, desired_pos):
