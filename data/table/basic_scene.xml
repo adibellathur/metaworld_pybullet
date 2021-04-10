@@ -1,4 +1,4 @@
-<mujocoinclude>
+<mujoco>
     <option timestep='0.0025' iterations="50" tolerance="1e-10" solver="Newton" jacobian="dense" cone="elliptic"/>
 
     <asset>
@@ -62,4 +62,4 @@
 
     </worldbody>
 
-</mujocoinclude>
+</mujoco>

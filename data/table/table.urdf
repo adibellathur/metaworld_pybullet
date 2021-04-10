@@ -1,4 +1,4 @@
-<?xml version="0.0" ?>
+<?xml version="0.0"?>
 <robot name="table.urdf">
   <link name="baseLink">
     <contact>
@@ -6,51 +6,50 @@
     </contact>
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
-       <mass value=".0"/>
+       <mass value="5"/>
        <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
     </inertial>
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0.6"/>
+      <origin rpy="0 0 0" xyz="0 0 .75"/>
       <geometry>
-				<mesh filename="table.obj" scale="1.5 1 0.05"/>
+		<mesh filename="table.obj" scale="1.5 1 0.05"/>
       </geometry>
        <material name="white">
         <color rgba="1 1 1 1"/>
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0.6"/>
+      <origin rpy="0 0 0" xyz="0 0 .3"/>
       <geometry>
-	 	<box size="1.5 1 0.05"/>
+	 	<box size="1.5 1 .9"/>
       </geometry>
     </collision>
 	<visual>
       <origin rpy="0 0 0" xyz="-0.65 -0.4 0.29"/>
       <geometry>
-	    <mesh filename="table.obj" scale="0.1 0.1 0.58"/>
+	    <mesh filename="table.obj" scale="0.1 0.1 .92"/>
       </geometry>
 	  <material name="framemat0"/>	 
     </visual>
     <visual>
       <origin rpy="0 0 0" xyz="-0.65 0.4 0.29"/>
       <geometry>
-        <mesh filename="table.obj" scale="0.1 0.1 0.58"/>
+        <mesh filename="table.obj" scale="0.1 0.1 .92"/>
       </geometry>
 	  <material name="framemat0"/>
 	  </visual>
     <visual>
       <origin rpy="0 0 0" xyz="0.65 -0.4 0.29"/>
       <geometry>
-        <mesh filename="table.obj" scale="0.1 0.1 0.58"/>
+        <mesh filename="table.obj" scale="0.1 0.1 .92"/>
       </geometry>
 	  <material name="framemat0"/>
 	  </visual>
     <visual>
-      <origin rpy="0 0 0" xyz="0.65 0.4 0.29"/>
+      <origin rpy="0 0 0" xyz="0.65 0.4 .29"/>
       <geometry>
-        <mesh filename="table.obj" scale="0.1 0.1 0.58"/>
+        <mesh filename="table.obj" scale="0.1 0.1 .92"/>
       </geometry>
     </visual>
   </link>
 </robot>
-
