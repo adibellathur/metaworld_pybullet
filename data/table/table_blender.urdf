@@ -1,0 +1,74 @@
+<?xml version="0.0"?>
+<robot name="table.urdf">
+  <link name="baseLink">
+
+    <!--gives table mass-->
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+       <mass value="5"/>
+       <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+
+    <!--defines collision geometry-->
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 .3"/>
+      <geometry>
+	 	<box size="1.5 1 .9"/>
+      </geometry>
+    </collision>
+
+
+
+    <!--defines visual component for TABLE TOP-->
+    <visual>
+      <origin rpy="0 0 0" xyz="0 .4 .7"/>
+      <geometry>
+		<mesh filename="table_blender.obj" scale="1.8 1 0.05"/>
+      </geometry>
+    </visual>
+
+    <!--defines visual component for LEG_A-->
+	<visual>
+      <origin rpy="0 0 0" xyz="-0.65 -0.4 0.29"/>
+      <geometry>
+	    <mesh filename="table_blender.obj" scale="0.1 0.1 .92"/>
+      </geometry>
+    </visual>
+
+    <!--defines visual component for LEG_C-->
+    <visual>
+      <origin rpy="0 0 0" xyz="-0.65 0.4 0.29"/>
+      <geometry>
+        <mesh filename="table_blender.obj" scale="0.1 0.1 .92"/>
+      </geometry>
+	</visual>
+
+    <!--defines visual component for LEG_B-->
+    <visual>
+      <origin rpy="0 0 0" xyz="0.65 -0.4 0.29"/>
+      <geometry>
+        <mesh filename="table_blender.obj" scale="0.1 0.1 0.92"/>
+      </geometry>
+	  <!--<material name="framemat0"/>-->	 
+	</visual>
+
+    <!--defines visual component for LEG_D-->
+    <visual>
+      <origin rpy="0 0 0" xyz="0.65 0.4 .29"/>
+      <geometry>
+        <mesh filename="table_blender.obj" scale="0.1 0.1 .92"/>
+      </geometry>
+    </visual>
+
+    <!--
+    <visual>
+      <origin rpy="0 0 0" xyz="0.65 0.4 .29"/>
+      <geometry>
+        <mesh filename="table_blender.obj" scale="0.1 0.1 1.92"/>
+      </geometry>
+    </visual>
+    -->
+
+  </link>
+</robot>
+<!--END OF URDF-->
