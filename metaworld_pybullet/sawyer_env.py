@@ -30,30 +30,10 @@ class SawyerEnv(object):
 
         return
 
-    def load_ugly_table(self):
-        return p.loadMJCF('../data/table/basic_scene.xml')
-
     def load_working_table(self):
         startPos = [0,1,-.8]
         startOrientation = p.getQuaternionFromEuler([0,0,0])
         return p.loadURDF('../data/table/table.urdf', startPos, startOrientation)
-
-    def load_table(self):
-        tablebody_collision_id = p.createCollisionShape(
-            shapeType=p.GEOM_MESH,
-            fileName="data/tablebody.stl",
-            flags=p.URDF_USE_SELF_COLLISION
-        )
-        tablebody_visual_id = p.createVisualShape(
-            shapeType=p.GEOM_MESH,
-            fileName="data/tablebody.stl",
-        )
-        body_id = p.createMultiBody(
-            baseMass=0,
-            baseCollisionShapeIndex=tablebody_collision_id,
-            baseVisualShapeIndex=tablebody_visual_id,
-        )
-        return body_id
 
     def reset(self):
         if (p.connect(p.SHARED_MEMORY) < 0):
