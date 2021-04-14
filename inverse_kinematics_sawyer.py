@@ -2,7 +2,7 @@ import time
 import numpy as np
 import pybullet as p
 
-from metaworld_pybullet.sawyer_env import SawyerEnv
+from metaworld_pybullet.sawyer_envs.sawyer_pick_place import SawyerPickPlaceEnv
 
 
 def main():
@@ -14,7 +14,7 @@ def main():
     hasPrevPose = 0
     trailDuration = 15
 
-    env = SawyerEnv()
+    env = SawyerPickPlaceEnv()
     obs = env.reset()
 
     while True:

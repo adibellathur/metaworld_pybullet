@@ -27,7 +27,6 @@ class SawyerEnv(object):
         )
         self.all_joint_indices = None
         self.prev_pos = None
-
         return
 
     def load_working_table(self):
