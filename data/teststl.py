@@ -4,10 +4,7 @@ import time
 
 p.connect(p.GUI)
 dt = p.getPhysicsEngineParameters()['fixedTimeStep']
-#p.setAdditionalSearchPath(pd.getDataPath())
 
-#husky = p.loadURDF("husky/husky.urdf")
-#husky = p.loadURDF("husky.urdf", flags=p.URDF_INITIALIZE_SAT_FEATURES)
 
 col_shape_id = p.createCollisionShape(
     shapeType=p.GEOM_MESH,

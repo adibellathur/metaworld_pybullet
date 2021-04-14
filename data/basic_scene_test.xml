@@ -47,6 +47,7 @@
         </body>
 
         <body name="RetainingWall" pos="0.0 0.6 0.06">
+            <!--Four sides of wall-->
             <geom material="wall_metal" type="box" size=".7 .01 .06" pos="0. -0.39 0." conaffinity="1" condim="3"
                   contype="0"/>
             <geom material="wall_metal" type="box" size=".7 .01 .06" pos="0. 0.39 0." conaffinity="1" condim="3"

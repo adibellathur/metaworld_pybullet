@@ -31,8 +31,12 @@ class SawyerEnv(object):
         return
 
     def load_ugly_table(self):
-        return p.loadMJCF('data/basic_scene_test.xml')
+        return p.loadMJCF('../data/table/basic_scene.xml')
 
+    def load_working_table(self):
+        startPos = [0,1,-.8]
+        startOrientation = p.getQuaternionFromEuler([0,0,0])
+        return p.loadURDF('../data/table/table.urdf', startPos, startOrientation)
 
     def load_table(self):
         tablebody_collision_id = p.createCollisionShape(
@@ -44,35 +48,21 @@ class SawyerEnv(object):
             shapeType=p.GEOM_MESH,
             fileName="data/tablebody.stl",
         )
-        tabletop_collision_id = p.createCollisionShape(
-            shapeType=p.GEOM_MESH,
-            fileName="data/tabletop.stl",
-            flags=p.URDF_USE_SELF_COLLISION
-        )
-
-        tabletop_visual_id = p.createVisualShape(
-            shapeType=p.GEOM_MESH,
-            fileName="data/tabletop.stl",
-        )
         body_id = p.createMultiBody(
-            # baseMass=0,
-            # baseCollisionShapeIndex=tablebody_collision_id,
-            # baseVisualShapeIndex=tablebody_visual_id,
-            linkMasses=[0,0],
-            linkCollisionShapeIndices=[tablebody_collision_id, tabletop_collision_id],
-            linkVisualShapeIndices=[tablebody_visual_id, tabletop_visual_id],
-            linkPositions=[[0,0,0],[0,0,0]],
-            linkOrientations=[[0, 0, 0, 1],[0, 0, 0, 1]],
+            baseMass=0,
+            baseCollisionShapeIndex=tablebody_collision_id,
+            baseVisualShapeIndex=tablebody_visual_id,
         )
         return body_id
 
-    def reset(self,):
-        p.connect(p.GUI)
+    def reset(self):
+        if (p.connect(p.SHARED_MEMORY) < 0):
+            p.connect(p.GUI)
         p.loadURDF("plane.urdf",[0,0,-.98])
 
         p.configureDebugVisualizer(p.COV_ENABLE_RENDERING,0)
 
-        self.table = self.load_ugly_table()
+        self.table = self.load_working_table()
         self.body = p.loadURDF("sawyer_robot/sawyer_description/urdf/sawyer.urdf",[0,0,0])
         p.resetBasePositionAndOrientation(self.body,[0,0,0],[0,0,0,1])
         self.num_joints = p.getNumJoints(self.body)
