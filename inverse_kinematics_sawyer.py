@@ -1,7 +1,6 @@
 import time
 import numpy as np
 import pybullet as p
-
 from metaworld_pybullet.sawyer_envs.sawyer_pick_place import SawyerPickPlaceEnv
 
 
@@ -17,7 +16,12 @@ def main():
     env = SawyerPickPlaceEnv()
     obs = env.reset()
 
+    joint_info = p.getJointInfo(env.body, 19)
+    print(joint_info[12], joint_info[16])
+
     while True:
+        # obs = env.step()
+        
         # iterate over these 3 goal positions 
         goal_pos = [
             [-0.4, 0.5, 0.4, 0.0],
@@ -34,16 +38,16 @@ def main():
                 action = np.concatenate([xyz_action, gripper_action])
 
                 obs = env.step(action)
-
+                tcp = obs[:3]
                 ls = p.getLinkState(env.body, env.end_effector_index)
                 if (hasPrevPose):
-                    p.addUserDebugLine(prevPose,goal[:3],[0,0,0.3],1,trailDuration)
-                    p.addUserDebugLine(prevPose1,ls[4],[1,0,0],1,trailDuration)
-                prevPose=goal[:3]
-                prevPose1=ls[4]
+                    p.addUserDebugLine(prevPose,tcp,[0,0,1],1,trailDuration)
+                    p.addUserDebugLine(prevPose1,ls[0],[1,0,0],1,trailDuration)
+                prevPose=tcp
+                prevPose1=ls[0]
                 hasPrevPose = 1
 
-                print("STEP: {}, OBS: {}".format(env.curr_path_length, obs))
+                print("STEP: {}, DIFF: {}".format(env.curr_path_length, np.linalg.norm(tcp - ls[0])))
 
 
 if __name__ == "__main__":
