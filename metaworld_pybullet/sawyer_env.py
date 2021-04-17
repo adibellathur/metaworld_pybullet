@@ -30,7 +30,7 @@ class SawyerEnv(object):
         return
 
     def load_working_table(self):
-        startPos = [0,1,-.8]
+        startPos = [0,.7,-.85]
         startOrientation = p.getQuaternionFromEuler([0,0,0])
         return p.loadURDF('../data/table/table.urdf', startPos, startOrientation)
 
