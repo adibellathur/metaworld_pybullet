@@ -45,7 +45,6 @@ class SawyerEnv(object):
             np.array([+1, +1, +1, +1]),
         )
         self.all_joint_indices = None
-        self.prev_pos = None
         self._partially_observable = False
         self._prev_obs = None
         return
@@ -75,6 +74,12 @@ class SawyerEnv(object):
             joint_indices=[3, 8, 10, 13,],
             angles=[float(np.pi/2), float(-np.pi / 4.0), float(np.pi / 4.0), float(np.pi / 2.0),],
         )
+        # p.setJointMotorControlArray(
+        #     self.body,
+        #     self.gripper_joint_indices,
+        #     p.VELOCITY_CONTROL,
+        #     forces=[0.1,0.1],
+        # )
 
         p.setRealTimeSimulation(self.real_time_simulation)
         p.setGravity(0,0,-9.8)
@@ -83,11 +88,11 @@ class SawyerEnv(object):
     
     def step(self, action=None):
         if action is not None and action.any():
-            curr_pos = self._get_obs()[:3]
+            curr_pos = self._prev_obs[:3]
             action = np.clip(action, -1.0, 1.0)
             delta_pos = action[:3]
-            gripper_pos = self.convert_to_gripper_distance(action[3])
-            gripper_pos = [gripper_pos, -gripper_pos]
+            gripper_pos = action[3]
+            gripper_pos = [-gripper_pos, gripper_pos]
 
             joint_poses = p.calculateInverseKinematics(
                 self.body,
@@ -109,28 +114,36 @@ class SawyerEnv(object):
             p.setJointMotorControlArray(
                 self.body, 
                 jointIndices=self.gripper_joint_indices, 
-                controlMode=p.POSITION_CONTROL, 
-                targetPositions=gripper_pos, 
+                controlMode=p.VELOCITY_CONTROL, 
+                targetVelocities=gripper_pos, 
+                forces=[3.0, 3.0]
             )
         p.stepSimulation()
         self.curr_path_length += 1
         return self._get_obs()
 
     def _get_curr_obs_combined_no_goal(self,):
-        # hand_pos = np.array(
-        #     p.getLinkState(
-        #         self.body, 
-        #         self.end_effector_index, 
-        #         computeForwardKinematics=True
-        #     )[0]
-        # )
         hand_pos = self.tcp_center
-        gripper_dist = np.array([
-            p.getJointState(
+        left_gripper_pos = np.array(
+            p.getLinkState(
                 self.body, 
-                self.gripper_joint_indices[0]
+                self.left_gripper_tip_index, 
             )[0]
+        )
+        right_gripper_pos = np.array(
+            p.getLinkState(
+                self.body, 
+                self.right_gripper_tip_index, 
+            )[0]
+        )
+        gripper_dist = np.array([
+            np.clip(
+                np.linalg.norm(left_gripper_pos - right_gripper_pos) / 0.1,
+                0.0,
+                1.0,
+            )
         ])
+
         obj_pos = self._get_obj_pos()
         obj_orientation = self._get_obj_orientation()
         obs = np.concatenate([
