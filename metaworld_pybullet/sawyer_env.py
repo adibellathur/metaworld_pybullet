@@ -8,8 +8,9 @@ class SawyerEnv(object):
 
     def __init__(self,):
         
-        self.body = None
-        self.table = None
+        self.body_id = None
+        self.table_id = None
+        self.obj_id = None
 
         self.end_effector_index = 19
         self.gripper_joint_indices = [20, 22]
@@ -18,11 +19,14 @@ class SawyerEnv(object):
         self.num_joints = 0
         self.damping_coeff = [0.001] * 23
         self.curr_path_length = 0
-        self.real_time_simulation = False
 
         self._goal_pos = None
         self.obj_init_pos = None
         self.obj_init_orientation = None
+        self._freeze_rand_vec = False
+
+        self.table_pos = [0,0.60,-.75]
+        self.table_orientation = p.getQuaternionFromEuler([0,0,0])
 
         self.hand_space = Box(
             np.array([-0.525, .348, -.0525]),
@@ -49,42 +53,54 @@ class SawyerEnv(object):
         self._prev_obs = None
         return
 
-    def load_working_table(self):
-        startPos = [0,.7,-.85]
-        startOrientation = p.getQuaternionFromEuler([0,0,0])
-        return p.loadURDF('../data/table/table.urdf', startPos, startOrientation)
+    def _load_working_table(self):
+        table = p.loadURDF('../data/table/table.urdf', self.table_pos, self.table_orientation)
+        p.resetBasePositionAndOrientation(table,self.table_pos, self.table_orientation)
+        return table
 
     def reset(self):
         if (p.connect(p.SHARED_MEMORY) < 0):
             p.connect(p.GUI)
-        p.loadURDF("plane.urdf",[0,0,-.98])
+        p.loadURDF("plane.urdf",[0,0,-.85])
+        self.table_id = self._load_working_table()
         p.configureDebugVisualizer(p.COV_ENABLE_RENDERING,0)
+        
+        self.body_id = p.loadURDF("sawyer_robot/sawyer_description/urdf/sawyer.urdf",[0,-0.1,0])
+        p.resetBasePositionAndOrientation(self.body_id,[0,-0.1,0],[0,0,0,1])
+        self.num_joints = p.getNumJoints(self.body_id)
 
-        self.table = self.load_working_table()
-        self.body = p.loadURDF("sawyer_robot/sawyer_description/urdf/sawyer.urdf",[0,0,0])
-        p.resetBasePositionAndOrientation(self.body,[0,0,0],[0,0,0,1])
-        self.num_joints = p.getNumJoints(self.body)
-
+        self.reset_model()
         p.configureDebugVisualizer(p.COV_ENABLE_RENDERING,1)
         
         self.curr_path_length = 0
-        self.all_joint_indices = list(range(p.getNumJoints(self.body)))
+        self.all_joint_indices = list(range(p.getNumJoints(self.body_id)))
         self._reset_joints()
         self._set_joint_angles(
             joint_indices=[3, 8, 10, 13,],
             angles=[float(np.pi/2), float(-np.pi / 4.0), float(np.pi / 4.0), float(np.pi / 2.0),],
         )
-        # p.setJointMotorControlArray(
-        #     self.body,
-        #     self.gripper_joint_indices,
-        #     p.VELOCITY_CONTROL,
-        #     forces=[0.1,0.1],
-        # )
-
-        p.setRealTimeSimulation(self.real_time_simulation)
+        p.setRealTimeSimulation(False)
         p.setGravity(0,0,-9.8)
         self._prev_obs = self._get_curr_obs_combined_no_goal()
         return self._get_obs()
+    
+    def _set_joint_angles(self, joint_indices, angles, velocities=0):
+        for i, (j, a) in enumerate(zip(joint_indices, angles)):
+            p.resetJointState(
+                self.body_id,
+                jointIndex=j,
+                # targetValue=min(max(a, self.lower_limits[j]), self.upper_limits[j]) if use_limits else a, 
+                targetValue=a, 
+                targetVelocity=velocities if type(velocities) in [int, float] else velocities[i]
+            )
+        return
+
+    def _reset_joints(self):
+        self._set_joint_angles(
+            self.all_joint_indices, 
+            [0.]*len(self.all_joint_indices)
+        )
+        return
     
     def step(self, action=None):
         if action is not None and action.any():
@@ -92,31 +108,31 @@ class SawyerEnv(object):
             action = np.clip(action, -1.0, 1.0)
             delta_pos = action[:3]
             gripper_pos = action[3]
-            gripper_pos = [-gripper_pos, gripper_pos]
+            gripper_pos = [-0.5 * gripper_pos, 0.5 * gripper_pos]
 
             joint_poses = p.calculateInverseKinematics(
-                self.body,
+                self.body_id,
                 self.end_effector_index,
                 targetPosition=curr_pos + delta_pos,
                 targetOrientation=p.getQuaternionFromEuler([0, -np.pi, 0]),
                 jointDamping=self.damping_coeff
             )
             for i in range (self.num_joints):
-                jointInfo = p.getJointInfo(self.body, i)
+                jointInfo = p.getJointInfo(self.body_id, i)
                 qIndex = jointInfo[3]
                 if qIndex > -1:
                     p.setJointMotorControlArray(
-                        bodyIndex=self.body,
+                        bodyIndex=self.body_id,
                         controlMode=p.POSITION_CONTROL,
                         jointIndices=[i,],
                         targetPositions=[joint_poses[qIndex-7],],
                     )
             p.setJointMotorControlArray(
-                self.body, 
+                self.body_id, 
                 jointIndices=self.gripper_joint_indices, 
                 controlMode=p.VELOCITY_CONTROL, 
                 targetVelocities=gripper_pos, 
-                forces=[3.0, 3.0]
+                forces=[100.0, 100.0]
             )
         p.stepSimulation()
         self.curr_path_length += 1
@@ -126,13 +142,13 @@ class SawyerEnv(object):
         hand_pos = self.tcp_center
         left_gripper_pos = np.array(
             p.getLinkState(
-                self.body, 
+                self.body_id, 
                 self.left_gripper_tip_index, 
             )[0]
         )
         right_gripper_pos = np.array(
             p.getLinkState(
-                self.body, 
+                self.body_id, 
                 self.right_gripper_tip_index, 
             )[0]
         )
@@ -155,7 +171,7 @@ class SawyerEnv(object):
             obj_orientation[4:],
         ])
         return obs
-    
+
     def _get_obs(self,):
         curr_obs = self._get_curr_obs_combined_no_goal()
         goal_pos = self._get_goal_pos()
@@ -169,24 +185,24 @@ class SawyerEnv(object):
         ])
         self._prev_obs = curr_obs
         return obs
-    
+
     @property
     def tcp_center(self,):
         left_gripper_pos = np.array(
             p.getLinkState(
-                self.body, 
+                self.body_id, 
                 self.left_gripper_tip_index, 
             )[0]
         )
         right_gripper_pos = np.array(
             p.getLinkState(
-                self.body, 
+                self.body_id, 
                 self.right_gripper_tip_index, 
             )[0]
         )
         tcp_center = np.average([left_gripper_pos, right_gripper_pos], axis=0)
         return tcp_center
-    
+
     def _get_obj_pos(self,):
         '''
         to be replaced in all child classes
@@ -198,13 +214,19 @@ class SawyerEnv(object):
         to be replaced in all child classes
         '''
         return np.array([0.,0.,0.,0.,0.,0.,0.,0.,])
-    
+
     def _get_goal_pos(self,):
         '''
         to be replaced in all child classes
         '''
         return  np.array([0.,0.,0.])
-    
+
+    def reset_model(self,):
+        '''
+        to be replaced in all child classes
+        '''
+        return
+
     @property
     def observation_space(self):
         goal_low = self.goal_space.low
@@ -233,32 +255,14 @@ class SawyerEnv(object):
                 goal_high,
             ])
         )
-    
-    def convert_to_xyz_action(self, desired_pos, scale=10):
+
+    def convert_to_xyz_action(self, desired_pos, scale=20):
         curr_pos = self._get_obs()[:3]
         delta_pos = (desired_pos - curr_pos) /(scale *  np.linalg.norm(desired_pos - curr_pos))
         return np.array(delta_pos)
 
     def convert_to_gripper_action(self, gripper_distance):
         return (gripper_distance / 0.02)
-    
+
     def convert_to_gripper_distance(self, gripper_action):
         return gripper_action * 0.02
-
-    def _set_joint_angles(self, joint_indices, angles, velocities=0):
-        for i, (j, a) in enumerate(zip(joint_indices, angles)):
-            p.resetJointState(
-                self.body,
-                jointIndex=j,
-                # targetValue=min(max(a, self.lower_limits[j]), self.upper_limits[j]) if use_limits else a, 
-                targetValue=a, 
-                targetVelocity=velocities if type(velocities) in [int, float] else velocities[i]
-            )
-        return
-
-    def _reset_joints(self):
-        self._set_joint_angles(
-            self.all_joint_indices, 
-            [0.]*len(self.all_joint_indices)
-        )
-        return

@@ -524,6 +524,15 @@
       <geometry>
         <box size="0.042 0.0065 0.037"/>
       </geometry>
+      <friction>
+          <ode>
+            <mu>1000.0</mu>
+            <mu2>1000.0</mu2>
+          </ode>
+        </friction>
+        <fdir1>0.0 0.0 1.0</fdir1>
+        <kp>1e5</kp>
+        <kd>1.0</kd>
     </collision>
     <inertial>
       <origin rpy="0 0 3.14159265359" xyz="0 0 0"/>
@@ -586,6 +595,15 @@
       <geometry>
         <box size="0.042 0.0065 0.037"/>
       </geometry>
+      <friction>
+          <ode>
+            <mu>1000.0</mu>
+            <mu2>1000.0</mu2>
+          </ode>
+        </friction>
+        <fdir1>0.0 0.0 1.0</fdir1>
+        <kp>1e5</kp>
+        <kd>1.0</kd>
     </collision>
     <inertial>
       <origin rpy="0 0 0.0" xyz="0 0 0"/>

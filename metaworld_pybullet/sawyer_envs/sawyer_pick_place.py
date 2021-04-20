@@ -10,22 +10,34 @@ class SawyerPickPlaceEnv(SawyerEnv):
 
     def __init__(self):
         super().__init__()
+        self.obj_id = None
+
         self.goal = np.array([0.0, 0.6, 0.2])
-        self.puck = None
+        self.obj_init_pos = np.array([0,.7,.0])
+        self.obj_init_orientation = p.getQuaternionFromEuler([0,0,0])
+
+        self._random_reset_space = Box(
+            np.hstack(([-0.1, 0.6, 0.0], [-0.1, 0.8, 0.05])),
+            np.hstack(([0.1, 0.7,0.0], [0.1, 0.9, 0.3])),
+        )
+
+        self.goal_space = Box(
+            np.array([-0.1, 0.8, 0.05]), 
+            np.array([0.1, 0.9, 0.3])
+        )
         return
 
     
-    def _load_puck(self):
-        startPos = [0,.7,.2]
-        startOrientation = p.getQuaternionFromEuler([0,0,0])
-        return p.loadURDF('../data/table/puck.urdf', startPos, startOrientation)
-        
+    def _load_obj(self):
+        obj_id = p.loadURDF('../data/table/puck.urdf', self.obj_init_pos, self.obj_init_orientation)
+        p.resetBasePositionAndOrientation(obj_id, self.obj_init_pos, self.obj_init_orientation)
+        return obj_id
 
-    def reset(self):
-        obs = super().reset()
-        self.puck = self._load_puck()
-        # TODO: SEBASTIAN - ADD NEW OBJECTS HERE TO THIS RESET FUNCTION
-        return obs
+    def reset_model(self):
+        # obs = super().reset()
+        self.obj_id = self._load_obj()
+        # TODO: OBJECT RANDOMIZATION
+        return
 
     def evaluate_state(self, obs, action):
         obj = obs[4:7]
