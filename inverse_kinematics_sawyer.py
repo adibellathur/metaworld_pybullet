@@ -24,7 +24,7 @@ def main():
             [0.0, 0.7, 0.15, 1.0],
             [0.0, 0.7, 0.04, -1.0],
             [0.0, 0.7, 0.01, 0.6],
-            [0.1, 0.5, 0.1, 1.0],
+            [0.1, 0.8, 0.2, 1.0],
         ]
         for goal in goal_pos:
             while(np.linalg.norm(obs[:3] - goal[:3]) > LOC_ACC):
@@ -35,7 +35,7 @@ def main():
                 gripper_action = np.array([goal[3]])
                 action = np.concatenate([xyz_action, gripper_action])
 
-                obs = env.step(action)
+                obs, reward, _, _ = env.step(action)
                 tcp = obs[:3]
                 ls = p.getLinkState(env.body_id, env.end_effector_index)
                 if (hasPrevPose):
@@ -44,7 +44,7 @@ def main():
                 prevPose=tcp
                 prevPose1=ls[0]
                 hasPrevPose = 1
-                print("STEP: {}, DIFF: {}".format(env.curr_path_length, np.linalg.norm(tcp - ls[0])))
+                print("STEP: {}, REWARD: {}".format(env.curr_path_length, reward))
 
 
 if __name__ == "__main__":
