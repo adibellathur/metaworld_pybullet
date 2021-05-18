@@ -65,7 +65,7 @@ class SawyerEnv(object):
         return table
 
     def reset(self):
-        if (p.connect(p.SHARED_MEMORY) < 0):
+        if (p.connect(p.SHARED_MEMORY) < 0 and not p.isConnected()):
             p.connect(p.GUI)
         p.loadURDF("plane.urdf",[0,0,-.85])
         self.table_id = self._load_working_table()
