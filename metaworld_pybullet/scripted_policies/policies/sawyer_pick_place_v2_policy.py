@@ -1,7 +1,7 @@
 import numpy as np
 
-from data.policies.action import Action
-from data.policies.policy import Policy, assert_fully_parsed, move
+from metaworld_pybullet.scripted_policies.action import Action
+from metaworld_pybullet.scripted_policies.policy import Policy, assert_fully_parsed, move
 
 
 class SawyerPickPlaceV2Policy(Policy):

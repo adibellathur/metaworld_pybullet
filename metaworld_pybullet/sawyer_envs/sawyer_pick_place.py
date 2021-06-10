@@ -57,7 +57,7 @@ class SawyerPickPlaceEnv(SawyerEnv):
         obj_ori = np.array(
             p.getBasePositionAndOrientation(
                 self.obj_id,
-            )[0]
+            )[1]
         )
         return np.concatenate([obj_ori, np.array([0., 0., 0., 0.,])])
 

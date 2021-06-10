@@ -57,6 +57,9 @@ class SawyerEnv(object):
         self.all_joint_indices = None
         self._partially_observable = False
         self._prev_obs = None
+
+        self.max_path_length = 500
+        
         return
 
     def _load_working_table(self):
@@ -65,8 +68,8 @@ class SawyerEnv(object):
         return table
 
     def reset(self):
-        if (p.connect(p.SHARED_MEMORY) < 0 and not p.isConnected()):
-            p.connect(p.GUI)
+        # if (p.connect(p.SHARED_MEMORY) < 0 and not p.isConnected()):
+        p.connect(p.GUI)
         p.loadURDF("plane.urdf",[0,0,-.85])
         self.table_id = self._load_working_table()
         p.configureDebugVisualizer(p.COV_ENABLE_RENDERING,0)

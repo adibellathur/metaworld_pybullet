@@ -21,15 +21,15 @@ def trajectory_summary(env, policy, act_noise_pct, render=False, end_on_success=
 
     for t, (r, done, info) in enumerate(trajectory_generator(env, policy, act_noise_pct, render)):
         rewards.append(r)
-        assert not env.isV2 or set(info.keys()) == {
-            'success',
-            'near_object',
-            'grasp_success',
-            'grasp_reward',
-            'in_place_reward',
-            'obj_to_target',
-            'unscaled_reward'
-        }
+        # assert set(info.keys()) == {
+        #     'success',
+        #     'near_object',
+        #     'grasp_success',
+        #     'grasp_reward',
+        #     'in_place_reward',
+        #     'obj_to_target',
+        #     'unscaled_reward'
+        # }
         success |= bool(info['success'])
         if not success:
             first_success = t
@@ -59,7 +59,7 @@ def trajectory_generator(env, policy, act_noise_pct, render=False):
     env.reset()
     env.reset_model()
     o = env.reset()
-    assert o.shape == env.observation_space.shape
+    assert o.shape == env.observation_space.shape, "{}, {}".format(o.shape, env.observation_space.shape)
     assert env.observation_space.contains(o), obs_space_error_text(env, o)
 
     for _ in range(env.max_path_length):
@@ -68,8 +68,8 @@ def trajectory_generator(env, policy, act_noise_pct, render=False):
 
         o, r, done, info = env.step(a)
         assert env.observation_space.contains(o), obs_space_error_text(env, o)
-        if render:
-            env.render()
+        # if render:
+        #     env.render()
 
         yield r, done, info
 

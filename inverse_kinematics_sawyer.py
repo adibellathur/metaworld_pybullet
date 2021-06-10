@@ -44,7 +44,7 @@ def main():
                 prevPose=tcp
                 prevPose1=ls[0]
                 hasPrevPose = 1
-                print("STEP: {}, REWARD: {}".format(env.curr_path_length, reward))
+                print("STEP: {}, REWARD: {}, SHAPE: {}".format(env.curr_path_length, reward, obs.shape))
 
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
 import pytest
 
 from metaworld_pybullet.sawyer_envs.sawyer_pick_place import SawyerPickPlaceEnv
-from data.policies.sawyer_pick_place_v2_policy import SawyerPickPlaceV2Policy
-from data.utils import trajectory_summary
+from metaworld_pybullet.scripted_policies.policies.sawyer_pick_place_v2_policy import SawyerPickPlaceV2Policy
+from metaworld_pybullet.scripted_policies.utils import trajectory_summary
 
 
 test_cases_old_nonoise = [
@@ -89,7 +89,7 @@ test_cases_latest_nonoise = [
     # ['peg-unplug-side-v2', SawyerPegUnplugSideV2Policy(), .0, .99],
     # ['pick-out-of-hole-v1', SawyerPickOutOfHoleV1Policy(), .0, 1.],
     # ['pick-out-of-hole-v2', SawyerPickOutOfHoleV2Policy(), .0, 1.],
-    ['pick-place-v2', SawyerPickPlaceV2Policy(), .0, .95],
+    [SawyerPickPlaceEnv, SawyerPickPlaceV2Policy(), .0, .95],
     # ['pick-place-wall-v2', SawyerPickPlaceWallV2Policy(), .0, .95],
     # ['plate-slide-back-side-v2', SawyerPlateSlideBackSideV2Policy(), .0, 1.],
     # ['plate-slide-back-v1', SawyerPlateSlideBackV1Policy(), .0, 1.],
@@ -180,7 +180,7 @@ test_cases_latest_noisy = [
     # ['peg-unplug-side-v2', SawyerPegUnplugSideV2Policy(), .1, .80],
     # ['pick-out-of-hole-v1', SawyerPickOutOfHoleV1Policy(), .1, .87],
     # ['pick-out-of-hole-v2', SawyerPickOutOfHoleV2Policy(), .1, .89],
-    ['pick-place-v2', SawyerPickPlaceV2Policy(), .1, .83],
+    [SawyerPickPlaceEnv, SawyerPickPlaceV2Policy(), .1, .83],
     # ['pick-place-wall-v2', SawyerPickPlaceWallV2Policy(), .1, .83],
     # ['plate-slide-back-side-v2', SawyerPlateSlideBackSideV2Policy(), .1, .95],
     # ['plate-slide-back-v1', SawyerPlateSlideBackV1Policy(), .1, .95],
